@@ -1,0 +1,84 @@
+version: "3"
+
+services: 
+  
+  zookeper:
+    image: zookeeper:3.6.3
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zookeper:2888:3888;2181
+    volumes:
+      - ./docker/zookeper/zoo.cfg:/conf/zoo.cfg
+
+  clickhouse_1:
+    image: yandex/clickhouse-server:21.3.13.9
+    depends_on:
+      - zookeper
+      - minio
+      - mariadb
+      - rabbitmq
+      - redis
+    volumes: 
+      - ./docker/clickhouse/config.xml:/etc/clickhouse-server/config.d/common.xml
+      - ./docker/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ./docker/clickhouse/clickhouse_1.xml:/etc/clickhouse-server/config.d/local.xml
+
+  clickhouse_2:
+    image: yandex/clickhouse-server:21.3.13.9
+    depends_on:
+      - zookeper
+      - minio
+      - mariadb
+      - rabbitmq
+      - redis
+    volumes: 
+      - ./docker/clickhouse/config.xml:/etc/clickhouse-server/config.d/common.xml
+      - ./docker/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ./docker/clickhouse/clickhouse_2.xml:/etc/clickhouse-server/config.d/local.xml
+
+  clickhouse_3:
+    image: yandex/clickhouse-server:21.3.13.9
+    depends_on:
+      - zookeper
+      - minio
+      - mariadb
+      - rabbitmq
+      - redis
+    volumes: 
+      - ./docker/clickhouse/config.xml:/etc/clickhouse-server/config.d/common.xml
+      - ./docker/clickhouse/users.xml:/etc/clickhouse-server/users.d/users.xml
+      - ./docker/clickhouse/clickhouse_3.xml:/etc/clickhouse-server/config.d/local.xml
+
+  # We will use minio to simulate S3 for ClickHouse storage 
+  minio:
+    image: bitnami/minio:2021.6.17
+    ports:
+      - 9123:9000
+    environment:
+      - MINIO_ACCESS_KEY=user
+      - MINIO_SECRET_KEY=changeme
+      - MINIO_DEFAULT_BUCKETS=clickhouse
+
+  mariadb:
+    image: mariadb:10.4.20
+    tmpfs: 
+      - /var/lib/mysql
+    environment: 
+      MARIADB_ROOT_PASSWORD: pass 
+      MARIADB_DATABASE: mydb
+    volumes:
+      - ./docker/mariadb/init/00.sakila-schema.sql:/docker-entrypoint-initdb.d/00.sakila-schema.sql
+      - ./docker/mariadb/init/01.sakila-data.sql:/docker-entrypoint-initdb.d/01.sakila-data.sql
+
+  redis:
+    image: redis:6.2-alpine
+
+  rabbitmq:
+    image: rabbitmq:3.8.9-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    volumes:
+      - ./resources:/opt/resources
+    tmpfs:
+      - /var/lib/rabbitmq

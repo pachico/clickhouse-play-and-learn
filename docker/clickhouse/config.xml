@@ -1,0 +1,76 @@
+<yandex>
+    <!-- ZooKeeper -->
+    <zookeeper>
+        <node index="1">
+            <host>zookeper</host>
+            <port>2181</port>
+        </node>
+    </zookeeper>
+
+    <!-- Distributed -->
+    <remote_servers>
+        <cluster_1>
+            <shard>
+                <internal_replication>true</internal_replication>
+                <replica>
+                    <host>clickhouse_1</host>
+                    <port>9000</port>
+                </replica>
+                <replica>
+                    <host>clickhouse_2</host>
+                    <port>9000</port>
+                </replica>
+                <replica>
+                    <host>clickhouse_3</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </cluster_1>
+    </remote_servers>
+
+    <logger>
+        <level>warning</level>
+        <console>1</console>
+    </logger>
+
+    <!-- Storage configuration -->
+    <storage_configuration>
+        <!-- S3 credentials -->
+        <disks>
+            <s3>
+                <type>s3</type>
+                <endpoint>http://minio:9000/clickhouse/data/</endpoint>
+                <access_key_id>user</access_key_id>
+                <secret_access_key>changeme</secret_access_key>
+                <region></region>
+            </s3>
+        </disks>
+        <policies>
+            <default_to_s3>
+                <volumes>
+                    <default>
+                        <disk>default</disk>
+                    </default>
+                    <s3>
+                        <disk>s3</disk>
+                        <perform_ttl_move_on_insert>0</perform_ttl_move_on_insert>
+                    </s3>
+                </volumes>
+            </default_to_s3>
+            <s3only>
+                <volumes>
+                    <s3>
+                        <disk>s3</disk>
+                        <perform_ttl_move_on_insert>0</perform_ttl_move_on_insert>
+                    </s3>
+                </volumes>
+            </s3only>
+        </policies>
+    </storage_configuration>
+    
+    <!-- RabbitMQ auth -->
+    <rabbitmq>
+        <username>admin</username>
+        <password>admin</password>
+    </rabbitmq>
+</yandex>

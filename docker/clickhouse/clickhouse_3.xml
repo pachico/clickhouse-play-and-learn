@@ -1,0 +1,9 @@
+<yandex>
+    <macros>
+      <shard>1</shard>
+      <replica>clickhouse_3</replica>
+    </macros>
+  
+    <!-- Replication -->
+    <interserver_http_host>clickhouse_3</interserver_http_host>
+  </yandex>
