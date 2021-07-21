@@ -1,4 +1,4 @@
-# ClickHouse playground
+# ClickHouse Play and Learn
 
 This project is a `docker-compose` based playground to explore and learn `ClickHouse`' features.
 
